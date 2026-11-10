@@ -4,8 +4,10 @@ import { Home, Cable, Building2, RadioTower, Compass, HeartHandshake, Layers, In
   Menu, X, Phone, ChevronDown, ArrowRight, Check } from 'lucide-react'
 import { submitInquiry } from './lib/submitInquiry'
 
-const PHONE = '+1 (917) 379-0093'
-const TEL = 'tel:+19173790093'
+// Number is assembled at click time so it is not printed in the page markup.
+const digits = () => ['929', '631', '4100']
+const telHref = () => 'tel:+1' + digits().join('')
+const phoneDisplay = () => { const [a, b, c] = digits(); return `+1 (${a}) ${b}-${c}` }
 const links = [['Home', '#home'], ['Residential Internet', '#services'], ['Business Solutions', '#services'], ['Why MyTelBridge', '#why'], ['FAQs', '#faq'], ['Contact', '#contact']]
 
 const Reveal = ({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) => (
@@ -21,9 +23,20 @@ const Logo = () => (
       <path d="M6 24c0-9 4.5-14 11-14s11 5 11 14" stroke="#050B1A" strokeWidth="3" fill="none" strokeLinecap="round" />
       <circle cx="17" cy="24" r="2.6" fill="#050B1A" />
     </svg>
-    My<span className="grad-text">TelBridge</span>
+    <span>My<span className="grad-text">TelBridge</span></span>
   </a>
 )
+
+function CallButton({ className, label = 'Call Our Team' }: { className: string; label?: string }) {
+  const [shown, setShown] = useState(false)
+  const onClick = () => {
+    setShown(true)
+    // On phones, start the call right away; on desktop, reveal the number.
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) window.location.href = telHref()
+  }
+  if (shown) return <a href={telHref()} className={className}><Phone size={16} />{phoneDisplay()}</a>
+  return <button type="button" onClick={onClick} className={className}><Phone size={16} />{label}</button>
+}
 
 function Nav() {
   const [open, setOpen] = useState(false)
@@ -232,7 +245,7 @@ function CTA() {
           <p className="relative mx-auto mt-5 max-w-xl text-lg text-blue-100">Let&rsquo;s find the connectivity solution that works for you. Connect with our team and explore your options.</p>
           <div className="relative mt-9 flex flex-col justify-center gap-3 sm:flex-row">
             <a href="#contact" className="btn bg-white text-navy-950 hover:-translate-y-0.5 hover:shadow-xl">Get Started</a>
-            <a href={TEL} className="btn border border-white/40 text-white hover:bg-white/10"><Phone size={16} />Call Our Team</a>
+            <CallButton className="btn border border-white/40 text-white hover:bg-white/10" />
           </div>
         </div>
       </Reveal>
@@ -244,7 +257,7 @@ const faqs = [
   ['What services does MyTelBridge offer?', 'MyTelBridge helps customers explore residential internet, fiber internet, business internet, and wireless connectivity solutions.'],
   ['How can I find internet options in my area?', 'Share your ZIP code and requirements through the contact form or call our team. We will help you review the options that may be available to you.'],
   ['Do you offer residential and business solutions?', 'Yes. We assist both households and businesses, with guidance based on your specific requirements.'],
-  ['How can I speak with your team?', `Call us at ${PHONE} or send an inquiry through the contact form on this page.`],
+  ['How can I speak with your team?', 'Use the Call Us button on this page or send an inquiry through the contact form.'],
   ['Are internet plans and pricing the same everywhere?', 'No. Available services, plans, and pricing can vary by location and eligibility. Our team can help you understand what applies to you.'],
   ['How do I get started?', 'Tell us what you need using the contact form or by phone, and we will guide you through the next steps.'],
 ]
@@ -319,7 +332,7 @@ function Contact() {
           <p className="mt-4 text-slate-400">Tell us what you need and we will help you explore your options.</p>
           <div className="glass mt-8 rounded-2xl p-6">
             <p className="font-display text-lg font-semibold text-white">MyTelBridge</p>
-            <a href={TEL} className="mt-2 flex items-center gap-3 text-xl font-semibold text-cyan2 hover:underline"><Phone size={20} />{PHONE}</a>
+            <CallButton label="Call Us" className="btn-primary mt-3" />
           </div>
         </Reveal>
         <Reveal delay={0.1} className="lg:col-span-3">
@@ -378,7 +391,7 @@ function Footer({ onLegal }: { onLegal: (k: 'Privacy Policy' | 'Terms & Conditio
         <div><Logo /><p className="mt-4 max-w-xs text-sm text-slate-400">Internet and connectivity guidance for homes and businesses across America.</p></div>
         <nav aria-label="Quick links"><h4 className="mb-4 font-semibold text-white">Quick Links</h4><ul className={col}>{[['Home', '#home'], ['Why MyTelBridge', '#why'], ['How It Works', '#how'], ['FAQs', '#faq'], ['Contact', '#contact']].map(([l, h]) => <li key={l}><a className="hover:text-white" href={h}>{l}</a></li>)}</ul></nav>
         <nav aria-label="Services"><h4 className="mb-4 font-semibold text-white">Services</h4><ul className={col}>{services.map((s) => <li key={s.title}><a className="hover:text-white" href="#services">{s.title}</a></li>)}</ul></nav>
-        <div><h4 className="mb-4 font-semibold text-white">Contact</h4><a href={TEL} className="text-cyan2 hover:underline">{PHONE}</a>
+        <div><h4 className="mb-4 font-semibold text-white">Contact</h4><CallButton label="Call Us" className="btn-ghost !py-2" />
           <ul className={`${col} mt-4`}><li><button className="hover:text-white" onClick={() => onLegal('Privacy Policy')}>Privacy Policy</button></li><li><button className="hover:text-white" onClick={() => onLegal('Terms & Conditions')}>Terms &amp; Conditions</button></li></ul></div>
       </div>
       <p className="border-t border-white/10 py-6 text-center text-xs text-slate-500">&copy; 2026 MyTelBridge. All rights reserved. Demo website.</p>
